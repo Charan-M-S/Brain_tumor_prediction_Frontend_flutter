@@ -1,0 +1,43 @@
+# Miscellaneous
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+*.iml
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+/build/
+
+# IDE
+# VS Code
+.vscode/
+# Android Studio
+.idea/
+
+# Android-specific
+/android/build/
+/android/.gradle/
+/android/app/build/
+/android/key.properties
+*.keystore
+
+# iOS-specific
+/ios/.symlinks/
+/ios/.generated/
+/ios/Flutter/Flutter.framework/
+/ios/Flutter/App.framework/
+/ios/Flutter/Generated.xcconfig
+/ios/Runner.xcworkspace/
+
+# Git
+# A directory to store generated documentation
+**/doc/api/
+
+# Exclude `pubspec.lock` if this is a library project.
+# For applications, this should be committed.
+# pubspec.lock
