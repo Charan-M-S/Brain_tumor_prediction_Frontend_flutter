@@ -94,7 +94,7 @@ class ApiService {
   }
 
   // ---------------- JSON APIs ----------------
-  static Future<Map<String, dynamic>> get(String endpoint) async {
+  static Future<dynamic> get(String endpoint) async {
     final uri = Uri.parse(baseUrl + endpoint);
     final response = await http.get(uri, headers: await getHeaders());
     return _safeDecode(response);
@@ -142,24 +142,28 @@ class ApiService {
   }
 
   // ---------- helpers ----------
-  static Map<String, dynamic> _safeDecode(http.Response response) {
-    final status = response.statusCode;
-    final body = response.body;
-    if (body.isEmpty) {
-      return {"status": status, "message": "No body"};
-    }
-    try {
-      final decoded = jsonDecode(body) as Map<String, dynamic>;
-      decoded['__status'] = status; // attach status
-      return decoded;
-    } catch (e) {
-      return {
-        "error": "Failed to decode response",
-        "status": status,
-        "body": body,
-      };
-    }
+  static dynamic _safeDecode(http.Response response) {
+  final status = response.statusCode;
+  final body = response.body;
+  if (body.isEmpty) {
+    return {"status": status, "message": "No body"};
   }
+
+  try {
+    final decoded = jsonDecode(body); // <-- Don't cast to Map
+    if (decoded is Map<String, dynamic>) {
+      decoded['__status'] = status; // attach status
+    }
+    return decoded; // could be Map or List
+  } catch (e) {
+    return {
+      "error": "Failed to decode response",
+      "status": status,
+      "body": body,
+    };
+  }
+}
+
 
   // Encodes fields and files to multipart bytes per RFC 2388
   static Uint8List _encodeMultipart(
