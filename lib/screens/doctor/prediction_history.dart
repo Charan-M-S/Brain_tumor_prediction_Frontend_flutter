@@ -522,7 +522,7 @@ class PredictionCard extends StatelessWidget {
               "Notes: ${notes.isEmpty
                   ? 'N/A'
                   : notes.length > 30
-                  ? notes.substring(0, 30) + '...'
+                  ? '${notes.substring(0, 30)}...'
                   : notes}",
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -563,11 +563,16 @@ class PredictionCard extends StatelessWidget {
                         ),
                         tooltip: "Validate",
                       ),
+                    if (validated)
                     IconButton(
-                      onPressed: () => downloadReport(reportPath),
+                      onPressed: validated
+                          ? () => downloadReport(reportPath)
+                          : null,
                       icon: Icon(
                         Icons.picture_as_pdf,
-                        color: Theme.of(context).colorScheme.secondary,
+                        color: validated
+                            ? Theme.of(context).colorScheme.secondary
+                            : Colors.grey, // optional: grey out when disabled
                       ),
                       tooltip: "Download Report",
                     ),

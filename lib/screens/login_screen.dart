@@ -50,29 +50,38 @@ class _LoginScreenState extends State<LoginScreen> {
       if (res.containsKey("token")) {
         // Save JWT
         await storage.write(key: "jwt_token", value: res["token"]);
+        await storage.write(key: "user", value: res["name"]);
 
         // Navigate based on role
         final role = res["role"];
         if (role == "doctor") {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => DoctorDashboard()));
+            context,
+            MaterialPageRoute(builder: (_) => DoctorDashboard()),
+          );
         } else {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => PatientDashboard()));
+            context,
+            MaterialPageRoute(builder: (_) => PatientDashboard()),
+          );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(res["error"] ?? "Login failed. Check credentials."),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res["error"] ?? "Login failed. Check credentials."),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Network Error: Could not reach server."),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Network Error: Could not reach server."),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -142,7 +151,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: Icons.email_outlined,
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty || !value.contains('@')) {
+                      if (value == null ||
+                          value.isEmpty ||
+                          !value.contains('@')) {
                         return 'Please enter a valid email';
                       }
                       return null;
@@ -175,7 +186,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       elevation: 5,
                     ),
                     child: loading
@@ -189,7 +201,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                         : const Text(
                             "Login Securely",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                   ),
                   const SizedBox(height: 15),
@@ -213,7 +228,10 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  InputDecoration _inputDecoration({required String labelText, required IconData icon}) {
+  InputDecoration _inputDecoration({
+    required String labelText,
+    required IconData icon,
+  }) {
     return InputDecoration(
       labelText: labelText,
       prefixIcon: Icon(icon, color: primaryColor.withOpacity(0.7)),

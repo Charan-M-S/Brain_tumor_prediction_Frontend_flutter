@@ -18,13 +18,20 @@ class _DoctorDashboardState extends State<DoctorDashboard>
   final FlutterSecureStorage storage = const FlutterSecureStorage();
   late TabController _tabController;
   int _selectedIndex = 0;
-
+  String? user = "";
   @override
   void initState() {
     super.initState();
     // Use DefaultTabController length if you use tabs outside of side nav
-    _tabController = TabController(length: 2, vsync: this); 
+    _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_handleTabSelection);
+    _loadUser();
+  }
+  Future<void> _loadUser() async {
+    final fetchedUser = await storage.read(key: 'user');
+    setState(() {
+      user = fetchedUser ?? 'User';
+    });
   }
 
   void _handleTabSelection() {
@@ -55,7 +62,8 @@ class _DoctorDashboardState extends State<DoctorDashboard>
       builder: (context, constraints) {
         // Define breakpoints
         bool isDesktop = constraints.maxWidth >= 1000; // Adjusted breakpoint
-        bool isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 1000;
+        bool isTablet =
+            constraints.maxWidth >= 600 && constraints.maxWidth < 1000;
         // isMobile = constraints.maxWidth < 600;
 
         if (isDesktop) {
@@ -83,16 +91,27 @@ class _DoctorDashboardState extends State<DoctorDashboard>
             width: 250,
             decoration: const BoxDecoration(
               color: Colors.white,
-              border: Border(right: BorderSide(color: Colors.black12, width: 1)),
+              border: Border(
+                right: BorderSide(color: Colors.black12, width: 1),
+              ),
             ),
             child: Column(
               children: [
                 // Header/Logo Area
                 Container(
-                  padding: const EdgeInsets.only(top: 40, bottom: 20, left: 24, right: 24),
+                  padding: const EdgeInsets.only(
+                    top: 40,
+                    bottom: 20,
+                    left: 24,
+                    right: 24,
+                  ),
                   child: Row(
                     children: [
-                      Icon(Icons.medical_services_outlined, size: 30, color: primaryColor),
+                      Icon(
+                        Icons.medical_services_outlined,
+                        size: 30,
+                        color: primaryColor,
+                      ),
                       const SizedBox(width: 10),
                       Text(
                         'MedAI',
@@ -105,7 +124,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
                     ],
                   ),
                 ),
-                
+
                 // Navigation Items
                 Expanded(
                   child: Padding(
@@ -115,8 +134,19 @@ class _DoctorDashboardState extends State<DoctorDashboard>
                       children: [
                         const Divider(color: Colors.black12),
                         const Padding(
-                          padding: EdgeInsets.only(left: 8.0, top: 10, bottom: 8),
-                          child: Text('TOOLS', style: TextStyle(color: Colors.grey, fontSize: 11, fontWeight: FontWeight.bold)),
+                          padding: EdgeInsets.only(
+                            left: 8.0,
+                            top: 10,
+                            bottom: 8,
+                          ),
+                          child: Text(
+                            'TOOLS',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                         _buildNavItem(
                           icon: Icons.cloud_upload_outlined,
@@ -130,9 +160,9 @@ class _DoctorDashboardState extends State<DoctorDashboard>
                           isSelected: _selectedIndex == 1,
                           onTap: () => _selectTab(1),
                         ),
-                        
+
                         const Spacer(),
-                        
+
                         // Logout Button
                         Container(
                           width: double.infinity,
@@ -160,7 +190,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
               ],
             ),
           ),
-          
+
           // Main Content Area
           Expanded(
             child: Column(
@@ -168,15 +198,22 @@ class _DoctorDashboardState extends State<DoctorDashboard>
                 // Top Bar (Header)
                 Container(
                   height: 80,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 10,
+                  ),
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
+                    border: Border(
+                      bottom: BorderSide(color: Colors.black12, width: 1),
+                    ),
                   ),
                   child: Row(
                     children: [
                       Text(
-                        _selectedIndex == 0 ? 'Upload MRI Scan' : 'Prediction History',
+                        _selectedIndex == 0
+                            ? 'Upload MRI Scan'
+                            : 'Prediction History',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -190,7 +227,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
                     ],
                   ),
                 ),
-                
+
                 // Content
                 Expanded(
                   child: Padding(
@@ -216,7 +253,10 @@ class _DoctorDashboardState extends State<DoctorDashboard>
       appBar: AppBar(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        title: const Text("Doctor Dashboard", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Doctor Dashboard",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         elevation: 0,
         actions: [
           _buildUserProfile(showName: false),
@@ -235,7 +275,10 @@ class _DoctorDashboardState extends State<DoctorDashboard>
           indicatorWeight: 4,
           labelColor: accentColor,
           unselectedLabelColor: Colors.white70,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
           tabs: const [
             Tab(icon: Icon(Icons.cloud_upload_outlined), text: "Upload MRI"),
             Tab(icon: Icon(Icons.data_usage_outlined), text: "History"),
@@ -246,10 +289,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
         padding: const EdgeInsets.all(16),
         child: TabBarView(
           controller: _tabController,
-          children: [
-            UploadMRIScreen(),
-            PredictionsHistoryScreen(),
-          ],
+          children: [UploadMRIScreen(), PredictionsHistoryScreen()],
         ),
       ),
     );
@@ -297,10 +337,12 @@ class _DoctorDashboardState extends State<DoctorDashboard>
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.only(top: 10.0), // Less padding for mobile content
+        padding: const EdgeInsets.only(
+          top: 10.0,
+        ), // Less padding for mobile content
         child: _buildContent(),
       ),
-      
+
       // Floating Action Button for the primary action
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton.extended(
@@ -315,7 +357,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
               foregroundColor: Colors.white,
             )
           : null,
-      
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _selectTab,
@@ -357,7 +399,9 @@ class _DoctorDashboardState extends State<DoctorDashboard>
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(8),
-          hoverColor: primaryColor.withOpacity(0.05), // Added hover effect for desktop feel
+          hoverColor: primaryColor.withOpacity(
+            0.05,
+          ), // Added hover effect for desktop feel
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -386,29 +430,31 @@ class _DoctorDashboardState extends State<DoctorDashboard>
 
   Widget _buildUserProfile({required bool showName}) {
     // Mock user data for display
-    const String userName = "Dr. John Doe";
-    const String userTitle = "Radiologist";
-    
+    String userName = user ?? 'User';
+    const String userTitle = "Doctor";
+
     return Row(
       children: [
         if (showName)
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text(userName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text(userTitle, style: TextStyle(color: Colors.grey, fontSize: 12)),
+            children: [
+              Text(
+                userName,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Text(
+                userTitle,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
             ],
           ),
         if (showName) const SizedBox(width: 10),
         CircleAvatar(
           radius: 20,
           backgroundColor: primaryColor.withOpacity(0.1),
-          child: Icon(
-            Icons.person,
-            size: 20,
-            color: primaryColor,
-          ),
+          child: Icon(Icons.person, size: 20, color: primaryColor),
         ),
       ],
     );
@@ -418,11 +464,8 @@ class _DoctorDashboardState extends State<DoctorDashboard>
     return TabBarView(
       controller: _tabController,
       // Prevents physics scroll in desktop view where tabs are controlled by buttons
-      physics: const NeverScrollableScrollPhysics(), 
-      children: [
-        UploadMRIScreen(),
-        PredictionsHistoryScreen(),
-      ],
+      physics: const NeverScrollableScrollPhysics(),
+      children: [UploadMRIScreen(), PredictionsHistoryScreen()],
     );
   }
 
