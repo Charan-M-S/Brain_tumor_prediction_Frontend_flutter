@@ -25,6 +25,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
   final _patientIdController = TextEditingController();
   bool loading = false;
   String? predictedClass;
+  String? segmentationPath;
   double? confidence;
 
   // --- Core Logic ---
@@ -101,13 +102,16 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
         setState(() {
           predictedClass = res["class"];
           confidence = (res["confidence"] as num).toDouble();
+          segmentationPath =
+              res["segmentation_path"]; // NEW: Optional segmentation
+          print(segmentationPath);
         });
         _showSnackbar("Prediction successful", successColor);
       } else {
         setState(() {
-          // Clear results on API failure
           predictedClass = null;
           confidence = null;
+          segmentationPath = null;
         });
         _showSnackbar(res["error"] ?? "Prediction failed", dangerColor);
       }
@@ -577,6 +581,29 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
 
             const SizedBox(height: 20),
             _buildConfidenceIndicator(resultColor),
+
+            // --- NEW: Segmentation Image Section ---
+            if (segmentationPath != null) ...[
+              const SizedBox(height: 24),
+              Text(
+                'Tumor Segmentation',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  'http://127.0.0.1:5000/$segmentationPath', // Replace with your actual server URL
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
           ],
         ),
       ),
