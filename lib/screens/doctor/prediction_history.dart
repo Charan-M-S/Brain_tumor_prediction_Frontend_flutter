@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
-
-// Assuming the path to ApiService is correct
 import '../../services/api_service.dart';
 
-// NOTE: Ensure 'intl: ^0.18.1' and 'url_launcher: ^6.1.10'
-// are added to your pubspec.yaml file under dependencies.
 
 class PredictionsHistoryScreen extends StatefulWidget {
   @override
@@ -57,7 +53,7 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        allPredictions = []; // CRITICAL: Ensure it's not null on failure
+        allPredictions = []; 
         loading = false;
       });
       _showSnackbar("Error fetching predictions: $e", Colors.red);
@@ -93,7 +89,6 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
       return;
     }
 
-    // Adjust the base URL as needed for your backend server
     const baseUrl = "http://localhost:5000";
     final url = "$baseUrl/$reportPath";
     final uri = Uri.parse(url);
@@ -255,12 +250,11 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
     );
   }
 
-  // Adjusted signature to use ColorSwatch to fix the 'shade700' error
   Widget _buildMetricCard({
     required String title,
     required int count,
     required IconData icon,
-    required ColorSwatch color, // <--- Corrected Type
+    required ColorSwatch color, 
   }) {
     return Expanded(
       child: Card(
@@ -282,7 +276,7 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
                   color: color,
                 ),
               ),
-              // Fixed the shade700 error by using color.shade700 on ColorSwatch
+              
               Text(title, style: TextStyle(fontSize: 12)),
             ],
           ),
@@ -305,8 +299,8 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
     return GridView.builder(
       padding: const EdgeInsets.all(12),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 400.0, // Max width of a card (responsive)
-        mainAxisExtent: 250, // Fixed height for a cleaner look
+        maxCrossAxisExtent: 400.0,
+        mainAxisExtent: 250, 
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
@@ -314,9 +308,7 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
       itemBuilder: (context, index) {
         final p = list[index] as Map<String, dynamic>;
 
-        // **CRITICAL FIXES APPLIED HERE:**
-        // Use ?.toString() ?? '' on all values expected to be Strings
-        final patientId = p['patient_id']?.toString() ?? 'N/A';
+        final patientName = p['patient_name']?.toString() ?? 'N/A';
         final predictedClass = p['predicted_class']?.toString() ?? 'Unknown';
 
         final rawConf = p['confidence'];
@@ -324,7 +316,7 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
 
         final validated = p['validated'] ?? false;
 
-        final notes = p['notes']?.toString() ?? ''; // Explicitly safe string
+        final notes = p['notes']?.toString() ?? ''; 
         final predictionId = p['_id']?.toString() ?? '';
         final reportPath = p['report_pdf_path']?.toString();
         final createdAt = p['created_at']?.toString() ?? '';
@@ -338,7 +330,7 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
         }
 
         return PredictionCard(
-          patientId: patientId,
+          patientName: patientName,
           predictedClass: predictedClass,
           confidence: confidence,
           validated: validated,
@@ -394,9 +386,9 @@ class _PredictionsHistoryScreenState extends State<PredictionsHistoryScreen> {
   }
 }
 
-// --- Unique Card Widget for Data Presentation ---
+// --- Card Widget
 class PredictionCard extends StatelessWidget {
-  final String patientId;
+  final String patientName;
   final String predictedClass;
   final double confidence;
   final bool validated;
@@ -408,7 +400,7 @@ class PredictionCard extends StatelessWidget {
   final Function(String?) downloadReport;
 
   const PredictionCard({
-    required this.patientId,
+    required this.patientName,
     required this.predictedClass,
     required this.confidence,
     required this.validated,
@@ -449,21 +441,20 @@ class PredictionCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Row 1: ID and Class Badge
-            // Row 1: ID and Class Badge (MODIFIED to be a Column for two rows)
             Column(
               crossAxisAlignment:
-                  CrossAxisAlignment.start, // Align contents to the left
+                  CrossAxisAlignment.start, 
               children: [
                 // FIRST ROW: Patient ID Text
                 Text(
-                  "Patient ID: $patientId",
+                  "Patient Name: $patientName",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18, // Slightly larger font for prominence
+                    fontSize: 18, 
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 12), // Increased vertical spacing
+                const SizedBox(height: 8), 
                 // SECOND ROW: Highlighted Predicted Class (REPLACED CHIP WITH CONTAINER)
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -471,10 +462,10 @@ class PredictionCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: classColor, // Use the class-specific color
+                    color: classColor, 
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
-                      // Subtle shadow to make it pop off the card
+                      
                       BoxShadow(
                         color: classColor.withOpacity(0.4),
                         blurRadius: 4,
@@ -487,7 +478,7 @@ class PredictionCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight:
-                          FontWeight.w900, // Extra bold for maximum impact
+                          FontWeight.w900, 
                       color: Colors.white,
                       letterSpacing: 1.2,
                     ),
@@ -564,18 +555,18 @@ class PredictionCard extends StatelessWidget {
                         tooltip: "Validate",
                       ),
                     if (validated)
-                    IconButton(
-                      onPressed: validated
-                          ? () => downloadReport(reportPath)
-                          : null,
-                      icon: Icon(
-                        Icons.picture_as_pdf,
-                        color: validated
-                            ? Theme.of(context).colorScheme.secondary
-                            : Colors.grey, // optional: grey out when disabled
+                      IconButton(
+                        onPressed: validated
+                            ? () => downloadReport(reportPath)
+                            : null,
+                        icon: Icon(
+                          Icons.picture_as_pdf,
+                          color: validated
+                              ? Theme.of(context).colorScheme.secondary
+                              : Colors.grey, 
+                        ),
+                        tooltip: "Download Report",
                       ),
-                      tooltip: "Download Report",
-                    ),
                   ],
                 ),
               ],

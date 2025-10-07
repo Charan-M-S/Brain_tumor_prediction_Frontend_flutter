@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:intl/intl.dart'; // Required for date formatting
+import 'package:intl/intl.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../services/api_service.dart';
 
-// Define the Color Palette (Consistent with other screens)
 const Color primaryColor = Color(0xFF1D5D9B); // Darker Blue
 const Color accentColor = Color(0xFFF4D160); // Golden Accent
 const Color backgroundColor = Color(0xFFF7F9FC); // Light background
@@ -17,18 +17,25 @@ class PatientDashboard extends StatefulWidget {
 
 class _PatientDashboardState extends State<PatientDashboard> {
   List<dynamic> predictions = [];
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
   bool loading = true;
-  final DateFormat _dateFormat = DateFormat('MMM dd, yyyy');
-  final DateFormat _parseFormat = DateFormat('EEE, dd MMM yyyy HH:mm:ss Z');
 
-  // change this to your backend base URL
+  final DateFormat _dateFormat = DateFormat('MMM dd, yyyy');
+  final DateFormat _parseFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss Z');
+
   final String baseUrl = "http://localhost:5000";
-  // For Android emulator use: "http://10.0.2.2:5000"
 
   @override
   void initState() {
     super.initState();
     fetchPredictions();
+  }
+
+  // --- Core Logic ---
+
+  void _logout(BuildContext context) async {
+    await storage.delete(key: "jwt_token");
+    Navigator.of(context).pushReplacementNamed('/login');
   }
 
   /// Fetches the patient's predictions.
@@ -38,12 +45,10 @@ class _PatientDashboardState extends State<PatientDashboard> {
 
     try {
       final res = await ApiService.get("/patient/predictions");
-
       if (!mounted) return;
 
       List<dynamic> preds = (res is List) ? res : [];
 
-      // Sort by creation date (latest first)
       preds.sort((a, b) {
         final dateA = a['created_at']?.toString() ?? '1';
         final dateB = b['created_at']?.toString() ?? '0';
@@ -63,7 +68,6 @@ class _PatientDashboardState extends State<PatientDashboard> {
 
   /// Downloads the PDF report.
   void downloadReport(String predictionId) async {
-    // Note: The URL is constructed here based on the prediction ID.
     final url = "$baseUrl/patient/report/$predictionId";
     final uri = Uri.parse(url);
 
@@ -72,7 +76,7 @@ class _PatientDashboardState extends State<PatientDashboard> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         _showSnackbar(
-          "Cannot launch report URL. Please check server status.",
+          "Cannot launch report URL. Check server status.",
           dangerColor,
         );
       }
@@ -92,12 +96,14 @@ class _PatientDashboardState extends State<PatientDashboard> {
     );
   }
 
+  // --- UI Build ---
+
   @override
   Widget build(BuildContext context) {
     if (loading) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Patient Dashboard")),
-        body: const Center(child: CircularProgressIndicator()),
+        backgroundColor: backgroundColor,
+        body: Center(child: CircularProgressIndicator(color: primaryColor)),
       );
     }
 
@@ -108,25 +114,58 @@ class _PatientDashboardState extends State<PatientDashboard> {
           : CustomScrollView(
               slivers: [
                 SliverAppBar(
-                  expandedHeight: 150.0,
+                  toolbarHeight: 90.0,
+                  backgroundColor: primaryColor,
+                  foregroundColor: backgroundColor,
+                  elevation: 4, 
                   floating: true,
                   pinned: true,
-                  backgroundColor: primaryColor,
-                  flexibleSpace: FlexibleSpaceBar(
-                    title: const Text(
-                      "Your Scan History 🧠",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+
+                  title: Text(
+                    "Your Scan History 🧠",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 24,
+                      color:
+                          backgroundColor, 
+                    ),
+                  ),
+                  centerTitle: false,
+
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: Center(
+                        child: SizedBox(
+                          height: 42,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _logout(context),
+                            icon: const Icon(Icons.logout, size: 18),
+                            label: const Text('Logout'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red[50],
+                              foregroundColor: Colors.red[700],
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: BorderSide(color: Colors.red[200]!),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    centerTitle: true,
-                    background: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [primaryColor.withOpacity(0.9), primaryColor],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                  ],
+
+                  flexibleSpace: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Color(0xFFE0E0E0),
+                          width: 1.5,
                         ),
                       ),
                     ),
@@ -199,16 +238,11 @@ class _PatientDashboardState extends State<PatientDashboard> {
     String formattedDate = 'N/A';
     if (createdAt.isNotEmpty) {
       try {
-        // Accessing _parseFormat (which must be defined as a class field)
         final DateTime parsedDate = _parseFormat
             .parse(createdAt, true)
             .toLocal();
-
-        // Accessing _dateFormat (which must be defined as a class field)
         formattedDate = _dateFormat.format(parsedDate);
       } catch (e) {
-        // Printing the full error here can help verify if the input string format is the problem
-        // print('Date parsing error with input: $createdAt. Error: $e');
         formattedDate = 'Invalid Date';
       }
     }
@@ -222,6 +256,7 @@ class _PatientDashboardState extends State<PatientDashboard> {
       ),
       child: ExpansionTile(
         initiallyExpanded: false,
+        // Visual indicator on the left
         leading: Icon(
           validated ? Icons.verified_user : Icons.pending_actions,
           color: statusColor,
@@ -231,6 +266,7 @@ class _PatientDashboardState extends State<PatientDashboard> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
+            // Highlight dangerous predictions
             color: predictedClass.toLowerCase().contains('malignant')
                 ? dangerColor
                 : primaryColor,

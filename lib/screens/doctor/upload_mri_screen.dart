@@ -1,11 +1,10 @@
-import 'dart:io' show File; // Only available on mobile/desktop
+import 'dart:io' show File; 
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../services/api_service.dart'; // Your custom service
+import '../../services/api_service.dart'; 
 
-// Define the Color Palette (Consistent with other screens)
 const Color primaryColor = Color(0xFF1D5D9B); // Darker Blue
 const Color accentColor = Color(0xFFF4D160); // Golden Accent
 const Color successColor = Color(
@@ -22,20 +21,17 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
   File? _selectedFile; // Mobile/Desktop
   Uint8List? _webImage; // Web
   XFile? _imageFile;
-  final _patientIdController = TextEditingController();
+  final _patientEmailController = TextEditingController();
   bool loading = false;
   String? predictedClass;
   String? segmentationPath;
   double? confidence;
-
-  // --- Core Logic ---
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      // Reset results upon selecting new image
       setState(() {
         predictedClass = null;
         confidence = null;
@@ -59,15 +55,15 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
   }
 
   Future<void> uploadAndPredict() async {
-    final patientId = _patientIdController.text.trim();
+    final patientEmail = _patientEmailController.text.trim();
 
     if ((kIsWeb && _webImage == null) || (!kIsWeb && _selectedFile == null)) {
       _showSnackbar("Please select an MRI image first.", Colors.orange);
       return;
     }
 
-    if (patientId.isEmpty) {
-      _showSnackbar("Please enter Patient ID.", Colors.orange);
+    if (patientEmail.isEmpty) {
+      _showSnackbar("Please enter Patient Email.", Colors.orange);
       return;
     }
 
@@ -92,7 +88,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
         req.files.add(fileObj);
       }
 
-      req.fields["patient_id"] = patientId;
+      req.fields["patient_email"] = patientEmail;
 
       final res = await ApiService.sendMultipart(req);
 
@@ -103,7 +99,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
           predictedClass = res["class"];
           confidence = (res["confidence"] as num).toDouble();
           segmentationPath =
-              res["segmentation_path"]; // NEW: Optional segmentation
+              res["segmentation_path"]; // Optional segmentation
           print(segmentationPath);
         });
         _showSnackbar("Prediction successful", successColor);
@@ -136,7 +132,6 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Reduced max width for better utilization in the dashboard context
         bool isDesktop = constraints.maxWidth >= 1000;
         bool isTablet =
             constraints.maxWidth >= 600 && constraints.maxWidth < 1000;
@@ -161,7 +156,6 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left Column - Upload Section (Wider space for form)
               Expanded(
                 flex: 2,
                 child: Card(
@@ -181,7 +175,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
                         ),
                         const SizedBox(height: 32),
 
-                        _buildPatientIdField(),
+                        _buildPatientEmailField(),
                         const SizedBox(height: 32),
 
                         _buildImageUploadSection(isLarge: true),
@@ -234,7 +228,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  _buildPatientIdField(),
+                  _buildPatientEmailField(),
                   const SizedBox(height: 24),
 
                   _buildImageUploadSection(isLarge: false),
@@ -276,7 +270,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment:
-                    CrossAxisAlignment.stretch, // Stretch buttons fully
+                    CrossAxisAlignment.stretch, 
                 children: [
                   _buildSectionHeader(
                     'Upload MRI Scan',
@@ -285,7 +279,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  _buildPatientIdField(),
+                  _buildPatientEmailField(),
                   const SizedBox(height: 20),
 
                   _buildImageUploadSection(isLarge: false),
@@ -325,7 +319,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
     );
   }
 
-  Widget _buildPatientIdField() {
+  Widget _buildPatientEmailField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -339,9 +333,9 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
         ),
         const SizedBox(height: 8),
         TextField(
-          controller: _patientIdController,
+          controller: _patientEmailController,
           decoration: InputDecoration(
-            labelText: "Patient ID (e.g., P001)",
+            labelText: "Patient Email (e.g., abc@gmail.com)",
             prefixIcon: Icon(
               Icons.person_outline,
               color: primaryColor.withOpacity(0.7),
@@ -446,7 +440,6 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
       width: double.infinity,
       height: isLarge ? 56 : 48,
       child: OutlinedButton.icon(
-        // Used OutlinedButton for secondary action
         onPressed: _pickImage,
         icon: Icon(Icons.file_upload_outlined, size: isLarge ? 24 : 20),
         label: Text(
@@ -504,7 +497,6 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
   }
 
   Widget _buildResultsSection() {
-    // Determine confidence color for use in result cards
     final resultColor = confidence != null
         ? (confidence! * 100) >= 80
               ? successColor
@@ -550,7 +542,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
         side: BorderSide(
           color: resultColor.withOpacity(0.5),
           width: 2,
-        ), // Highlight the results card
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -568,7 +560,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
               icon: Icons.medical_information,
               title: 'Predicted Class',
               value: predictedClass!,
-              color: primaryColor, // Always use primary for class
+              color: primaryColor, 
             ),
             const SizedBox(height: 16),
 
@@ -576,13 +568,13 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
               icon: Icons.lightbulb_outline,
               title: 'Confidence Level',
               value: '${(confidence! * 100).toStringAsFixed(1)}%',
-              color: resultColor, // Color-coded confidence
+              color: resultColor, 
             ),
 
             const SizedBox(height: 20),
             _buildConfidenceIndicator(resultColor),
 
-            // --- NEW: Segmentation Image Section ---
+            // Segmentation Image Section
             if (segmentationPath != null) ...[
               const SizedBox(height: 24),
               Text(
@@ -597,7 +589,7 @@ class _UploadMRIScreenState extends State<UploadMRIScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  'http://127.0.0.1:5000/$segmentationPath', // Replace with your actual server URL
+                  'http://127.0.0.1:5000/$segmentationPath', 
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.contain,

@@ -3,7 +3,6 @@ import 'upload_mri_screen.dart';
 import 'prediction_history.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-// Define the Color Palette for a professional look
 const Color primaryColor = Color(0xFF1D5D9B); // Darker Blue
 const Color accentColor = Color(0xFFF4D160); // Golden Accent
 const Color backgroundColor = Color(0xFFF7F9FC); // Light background
@@ -22,7 +21,6 @@ class _DoctorDashboardState extends State<DoctorDashboard>
   @override
   void initState() {
     super.initState();
-    // Use DefaultTabController length if you use tabs outside of side nav
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_handleTabSelection);
     _loadUser();
@@ -52,7 +50,6 @@ class _DoctorDashboardState extends State<DoctorDashboard>
   // Logout function
   void _logout(BuildContext context) async {
     await storage.delete(key: "jwt_token");
-    // Assuming '/login' is correctly defined in your MaterialApp routes
     Navigator.of(context).pushReplacementNamed('/login');
   }
 
@@ -60,8 +57,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Define breakpoints
-        bool isDesktop = constraints.maxWidth >= 1000; // Adjusted breakpoint
+        bool isDesktop = constraints.maxWidth >= 1000;
         bool isTablet =
             constraints.maxWidth >= 600 && constraints.maxWidth < 1000;
         // isMobile = constraints.maxWidth < 600;
@@ -77,9 +73,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
     );
   }
 
-  // -------------------------------------------------------------------
   // ## Desktop Layout (Side Navigation)
-  // -------------------------------------------------------------------
 
   Widget _buildDesktopLayout(BuildContext context) {
     return Scaffold(
@@ -221,7 +215,6 @@ class _DoctorDashboardState extends State<DoctorDashboard>
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.notifications_none, color: Colors.grey),
                       const SizedBox(width: 20),
                       _buildUserProfile(showName: true), // Show user name/title
                     ],
@@ -243,9 +236,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
     );
   }
 
-  // -------------------------------------------------------------------
-  // ## Tablet Layout (App Bar Tabs)
-  // -------------------------------------------------------------------
+  // ## Tablet Layout (App Bar Tabs)\
 
   Widget _buildTabletLayout(BuildContext context) {
     return Scaffold(
@@ -295,9 +286,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
     );
   }
 
-  // -------------------------------------------------------------------
-  // ## Mobile Layout (Bottom Navigation)
-  // -------------------------------------------------------------------
+  // ## Mobile Layout (Bottom Navigation)\
 
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
@@ -343,13 +332,13 @@ class _DoctorDashboardState extends State<DoctorDashboard>
         child: _buildContent(),
       ),
 
-      // Floating Action Button for the primary action
-      floatingActionButton: _selectedIndex == 0
+      floatingActionButton: _selectedIndex == 1
           ? FloatingActionButton.extended(
               onPressed: () {
                 // Logic to trigger file selection or navigate to detailed upload
                 // For now, it just ensures the Upload screen is shown
                 _selectTab(0);
+
               },
               icon: const Icon(Icons.add),
               label: const Text('New Scan'),
@@ -381,9 +370,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
     );
   }
 
-  // -------------------------------------------------------------------
   // ## Helper Widgets
-  // -------------------------------------------------------------------
 
   Widget _buildNavItem({
     required IconData icon,
@@ -401,7 +388,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
           borderRadius: BorderRadius.circular(8),
           hoverColor: primaryColor.withOpacity(
             0.05,
-          ), // Added hover effect for desktop feel
+          ), 
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -429,7 +416,6 @@ class _DoctorDashboardState extends State<DoctorDashboard>
   }
 
   Widget _buildUserProfile({required bool showName}) {
-    // Mock user data for display
     String userName = user ?? 'User';
     const String userTitle = "Doctor";
 
@@ -463,7 +449,7 @@ class _DoctorDashboardState extends State<DoctorDashboard>
   Widget _buildContent() {
     return TabBarView(
       controller: _tabController,
-      // Prevents physics scroll in desktop view where tabs are controlled by buttons
+      
       physics: const NeverScrollableScrollPhysics(),
       children: [UploadMRIScreen(), PredictionsHistoryScreen()],
     );

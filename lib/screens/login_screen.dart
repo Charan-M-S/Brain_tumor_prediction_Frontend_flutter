@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../services/api_service.dart';
-import 'doctor/doctor_dashboard.dart'; // Ensure this path is correct
-import 'patient/patient_dashboard.dart'; // Ensure this path is correct
 
 // Define the Color Palette (same as DoctorDashboard for consistency)
 const Color primaryColor = Color(0xFF1D5D9B); // Darker Blue
@@ -55,15 +53,9 @@ class _LoginScreenState extends State<LoginScreen> {
         // Navigate based on role
         final role = res["role"];
         if (role == "doctor") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => DoctorDashboard()),
-          );
+          Navigator.pushReplacementNamed(context, "/doctor");
         } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => PatientDashboard()),
-          );
+          Navigator.pushReplacementNamed(context, "/patient");
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
